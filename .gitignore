@@ -36,9 +36,6 @@ yarn-error.log*
 # vercel
 .vercel
 
-# generated product images (local disk storage)
-/storage/
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts

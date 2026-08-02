@@ -1,51 +1,52 @@
 import "server-only";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-
-export const STORAGE_ROOT = path.join(process.cwd(), "storage", "product-images");
+import { supabaseAdmin, PRODUCT_IMAGES_BUCKET } from "@/lib/supabase-admin";
 
 export type ImageVariant = "source" | "cutout" | "ig-square" | "ig-portrait" | "facebook";
 
+const CONTENT_TYPES: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+};
+
 /**
- * Builds the relative path used for both the DB column and the public URL.
- * Kept flat (no nested dirs beyond productId) so resolveStoragePath's
- * traversal guard only has to reason about one path segment.
+ * Builds the relative path used both as the Supabase Storage object key and,
+ * combined with the bucket's public URL, the path browsers/Meta fetch it from.
  */
 export function buildRelativePath(productId: number, variant: ImageVariant, ext: string) {
   return `${productId}/${Date.now()}-${variant}.${ext}`;
 }
 
+// Stored on local disk this would break on Vercel: serverless functions get a fresh,
+// isolated filesystem per invocation, so a file written in one request is gone by the
+// next. Supabase Storage (same project as the database) gives every generated image a
+// stable, publicly fetchable URL regardless of which function instance handles a request
+// — required for Instagram's Graph API, which fetches the image itself from a URL.
 export async function saveProductImageFile(relativePath: string, buffer: Buffer) {
-  const absolutePath = resolveStoragePath(relativePath);
-  await mkdir(path.dirname(absolutePath), { recursive: true });
-  await writeFile(absolutePath, buffer);
+  const ext = relativePath.split(".").pop()?.toLowerCase() ?? "";
+  const { error } = await supabaseAdmin.storage
+    .from(PRODUCT_IMAGES_BUCKET)
+    .upload(relativePath, buffer, {
+      contentType: CONTENT_TYPES[ext] ?? "application/octet-stream",
+      upsert: true,
+    });
+
+  if (error) {
+    throw new Error(`Failed to upload ${relativePath}: ${error.message}`);
+  }
 }
 
 export async function readProductImageFile(relativePath: string) {
-  return readFile(resolveStoragePath(relativePath));
-}
+  const { data, error } = await supabaseAdmin.storage.from(PRODUCT_IMAGES_BUCKET).download(relativePath);
 
-/**
- * Resolves a relative path against STORAGE_ROOT and throws if the result
- * would escape it (path traversal guard) — used both when writing generated
- * files and when serving them back through the route handler.
- */
-export function resolveStoragePath(relativePath: string) {
-  const absolutePath = path.join(STORAGE_ROOT, relativePath);
-  const relativeToRoot = path.relative(STORAGE_ROOT, absolutePath);
-
-  if (relativeToRoot.startsWith("..") || path.isAbsolute(relativeToRoot)) {
-    throw new Error("Path escapes storage root");
+  if (error || !data) {
+    throw new Error(`Failed to download ${relativePath}: ${error?.message ?? "not found"}`);
   }
 
-  return absolutePath;
-}
-
-export function publicImagePath(relativePath: string) {
-  return `/api/product-images/${relativePath}`;
+  return Buffer.from(await data.arrayBuffer());
 }
 
 export function publicImageUrl(relativePath: string) {
-  const base = process.env.PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-  return new URL(publicImagePath(relativePath), base).toString();
+  return supabaseAdmin.storage.from(PRODUCT_IMAGES_BUCKET).getPublicUrl(relativePath).data.publicUrl;
 }

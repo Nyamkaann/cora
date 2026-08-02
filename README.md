@@ -65,17 +65,18 @@ Business account via the Meta Graph API).
    | Variable | Description |
    | --- | --- |
    | `DATABASE_URL` | Supabase Postgres connection string from step 1. Must include `?sslmode=require`. |
+   | `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Same project, from **Settings → API**. Powers the Marketing module's image storage (see [Product image automation](#product-image-automation-phase-3)). Service role key is server-only, never sent to the browser. |
    | `AUTH_SECRET` | Random secret for NextAuth session signing. Generate with `openssl rand -base64 32`. |
    | `NEXTAUTH_URL` | Base URL of the app (`http://localhost:3000` in dev). |
    | `META_APP_ID` / `META_APP_SECRET` | Meta Developer app credentials — needed to obtain a Page access token, not called directly by this app. Optional. |
    | `META_PAGE_ACCESS_TOKEN` / `META_PAGE_ID` / `META_IG_BUSINESS_ID` | Required for the Marketing module's "Post" button to actually post. Left unset, image generation still works and posting is cleanly skipped. |
-   | `PUBLIC_BASE_URL` | Public HTTPS origin used to build the image URL Instagram's API fetches from. Falls back to `NEXTAUTH_URL`. Must be a real reachable domain for Instagram posting — see [Product image automation](#product-image-automation-phase-3). |
 
-4. Push the schema and seed an admin user:
+4. Push the schema, seed an admin user, and create the Storage bucket:
 
    ```bash
    npm run db:push
    npm run db:seed
+   npm run storage:setup
    ```
 
    Seeded login: `admin@cora.mn` / `ChangeMe123!` — change the password by
@@ -122,6 +123,7 @@ inside each server action via `src/lib/auth-guard.ts` (defense in depth).
 | `npm run db:migrate` | Apply generated migrations |
 | `npm run db:studio` | Open Drizzle Studio to browse the database |
 | `npm run db:seed` | Seed the initial admin user |
+| `npm run storage:setup` | Create the public `product-images` Supabase Storage bucket (idempotent) |
 
 ## Project layout
 
@@ -139,12 +141,12 @@ src/
     format.ts      currency/date formatting per locale
     images/        Background removal + template compositing (Phase 3)
     meta.ts        Meta Graph API client (Phase 4)
+    supabase-admin.ts  Service-role Supabase client (Storage uploads only)
   components/    UI primitives + per-module form/table components
   app/[locale]/
     (auth)/login
     (dashboard)/ finance, inventory, sales, users, import, marketing
-  app/api/product-images/[...path]/  Serves generated files from storage/ (path-traversal guarded)
-storage/product-images/  Generated files on local disk, gitignored — not in public/
+  db/setup-storage.ts  One-off script: creates the public Storage bucket
 ```
 
 ## Excel import (Phase 2)
@@ -190,11 +192,17 @@ background), and the app automatically:
    its standard path for text). Produces all three target sizes at once:
    1080×1080 (Instagram square), 1080×1350 (Instagram portrait), 1200×630
    (Facebook).
-3. **Saves everything** to `storage/product-images/{productId}/` (gitignored,
-   outside `public/`) and records a `product_images` row. Served back to the
-   browser — and to Meta, for Instagram — through
-   `src/app/api/product-images/[...path]/route.ts`, which resolves paths
-   against that storage root and rejects anything that would escape it.
+3. **Saves everything** to a public **Supabase Storage** bucket
+   (`src/lib/images/storage.ts`, bucket name `product-images`, created by
+   `npm run storage:setup`) and records a `product_images` row.
+
+   Images are **not** written to local disk. Vercel (and most serverless
+   hosts) give every function invocation a fresh, isolated filesystem — a
+   file saved during one request is simply gone by the next, so the app
+   would generate an image successfully and then 404 trying to show or post
+   it moments later. Supabase Storage gives each image a stable public URL
+   any function instance (or Meta's own servers, for Instagram) can fetch
+   regardless of which one handled the request.
 
 Real phone photos routinely exceed Next's default 1MB Server Action body
 limit, so `next.config.ts` raises `experimental.serverActions.bodySizeLimit`
@@ -229,12 +237,9 @@ a message explaining why, rather than pretending to succeed.
   since we push the bytes to Meta rather than Meta fetching from us.
 - **Instagram** (`postImageToInstagram`) — the two-step Content Publishing
   flow (create a media container with an `image_url`, then publish it).
-  **This one requires `PUBLIC_BASE_URL` to be a real, publicly reachable
-  HTTPS origin** — Meta's servers fetch the image from that URL themselves,
-  and in local dev (`http://localhost:3000/...`) that fetch will simply fail
-  since Meta cannot reach your machine. Instagram posting is a
-  production-only capability until this app is deployed somewhere public;
-  Facebook posting works regardless of environment.
+  Meta's servers fetch the image themselves from that URL, which is why it
+  has to be the Supabase Storage public URL (always real and reachable, even
+  from local dev) rather than an address on our own app.
 
 No live post was made against a real Facebook Page or Instagram account
 while building this — there are no real Meta credentials configured in this

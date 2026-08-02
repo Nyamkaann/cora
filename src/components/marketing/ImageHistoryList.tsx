@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { PostButton } from "./PostButton";
 import { formatDate } from "@/lib/format";
+import { publicImageUrl } from "@/lib/images/storage";
 import type { ProductImage, SocialPost } from "@/db/schema";
 import type { PostResult } from "@/lib/actions/marketing";
 
@@ -64,7 +65,7 @@ export async function ImageHistoryList({ images, locale }: { images: ImageWithPo
                   <p className="mb-1 text-xs text-neutral-500">{t("previewIgSquare")}</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/api/product-images/${image.igSquarePath}`}
+                    src={publicImageUrl(image.igSquarePath!)}
                     alt={t("previewIgSquare")}
                     className="w-full rounded-md border border-neutral-200"
                   />
@@ -73,7 +74,7 @@ export async function ImageHistoryList({ images, locale }: { images: ImageWithPo
                   <p className="mb-1 text-xs text-neutral-500">{t("previewIgPortrait")}</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/api/product-images/${image.igPortraitPath}`}
+                    src={publicImageUrl(image.igPortraitPath!)}
                     alt={t("previewIgPortrait")}
                     className="w-full rounded-md border border-neutral-200"
                   />
@@ -82,7 +83,7 @@ export async function ImageHistoryList({ images, locale }: { images: ImageWithPo
                   <p className="mb-1 text-xs text-neutral-500">{t("previewFacebook")}</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/api/product-images/${image.facebookPath}`}
+                    src={publicImageUrl(image.facebookPath!)}
                     alt={t("previewFacebook")}
                     className="w-full rounded-md border border-neutral-200"
                   />
