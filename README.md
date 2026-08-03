@@ -246,3 +246,46 @@ while building this — there are no real Meta credentials configured in this
 environment, and the agent building this did not fabricate a test of live,
 irreversible publishing to a real account. Once you configure real
 credentials, test the "Post" button yourself on a low-stakes product first.
+
+## Deploying to Vercel
+
+Live at **https://cora-vert.vercel.app**. Two non-obvious things had to be
+fixed to get a working deployment — both are already handled in this repo,
+documented here so a future redeploy-from-scratch doesn't rediscover them the
+hard way:
+
+1. **Use the Session pooler connection string, not the direct one.**
+   Supabase's direct-connection hostname (`db.<ref>.supabase.co`) resolves to
+   an IPv6-only address; Vercel's serverless functions can't reach it
+   (`ENOTFOUND`, surfaces misleadingly as "invalid email or password" since
+   NextAuth's `authorize()` swallows the DB error into a generic
+   `CredentialsSignin`). Use the **Session pooler** URI instead
+   (`aws-0-<region>.pooler.supabase.com:5432`, from the same Connection
+   string panel) — it's IPv4-compatible. Works fine locally too.
+
+2. **`onnxruntime-node`'s native binary needs an explicit trace include,
+   scoped to exactly the Marketing route.** It loads
+   `libonnxruntime.so.*` from a computed `process.platform`/`process.arch`
+   path at build time, which Vercel's static file tracer can't follow, so
+   the file silently isn't in the deployed function ("cannot open shared
+   object file"). `next.config.ts` fixes this with `serverExternalPackages`
+   plus a scoped `outputFileTracingIncludes` entry — two things worth
+   knowing if you ever touch that config:
+   - Route keys are **picomatch globs**, so literal `[locale]` and
+     `(dashboard)` segments must be escaped (`\\[locale\\]`, `\\(dashboard\\)`)
+     or they're parsed as glob syntax (a character class and an extglob,
+     respectively) and silently match nothing.
+   - Scope the include to the one route that needs it
+     (`/\\[locale\\]/\\(dashboard\\)/marketing`). Using a global key (`/*` or
+     `/**`) does successfully include the binary everywhere, but blows every
+     function's bundle up enough that Vercel stops merging routes into
+     shared functions — which tipped this project over the Hobby plan's
+     12-function-per-deployment cap.
+
+Deployed via the Vercel CLI with a Personal Access Token (`vercel env add`
+for each variable in Production + Preview, then `vercel deploy --prod`) —
+`DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `AUTH_SECRET`,
+and `NEXTAUTH_URL` (set to the deployment's own URL) are all configured
+there. `META_*` vars are intentionally left unset in this environment —
+posting cleanly no-ops until whoever runs this for real adds their own Meta
+credentials.
