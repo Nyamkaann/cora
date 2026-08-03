@@ -121,6 +121,8 @@
     "chooseFile": "Choose an .xlsx file",
     "upload": "Upload",
     "uploading": "Uploading...",
+    "downloadTemplate": "Download blank template",
+    "downloadTemplateHint": "Not sure how to format your file? Download a blank template with the expected columns.",
     "selectSheet": "Sheet",
     "previewTitle": "Preview (first 5 rows)",
     "mappingTitle": "Map spreadsheet columns to product fields",

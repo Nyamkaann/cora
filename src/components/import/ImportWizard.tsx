@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   parseWorkbookAction,
   importProductsAction,
@@ -93,6 +93,7 @@ const REASON_KEYS: Record<string, string> = {
 
 export function ImportWizard() {
   const t = useTranslations("Import");
+  const locale = useLocale();
 
   const [parseState, parseAction, isParsing] = useActionState<ParseWorkbookState, FormData>(
     parseWorkbookAction,
@@ -127,6 +128,15 @@ export function ImportWizard() {
       {parseState && "error" in parseState && (
         <p className="text-sm text-red-600">{t(PARSE_ERROR_KEYS[parseState.error] ?? "errorParseFailed")}</p>
       )}
+      <div className="border-t border-neutral-200 pt-3">
+        <p className="mb-1.5 text-xs text-neutral-500">{t("downloadTemplateHint")}</p>
+        <a
+          href={`/${locale}/import/template`}
+          className="text-sm font-medium text-neutral-700 underline underline-offset-2 hover:text-neutral-900"
+        >
+          {t("downloadTemplate")}
+        </a>
+      </div>
     </Card>
   );
 }
