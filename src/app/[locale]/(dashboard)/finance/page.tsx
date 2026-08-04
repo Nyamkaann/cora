@@ -6,8 +6,10 @@ import { requireRole } from "@/lib/auth-guard";
 import { NewTransactionPanel } from "@/components/finance/NewTransactionPanel";
 import { TransactionTable } from "@/components/finance/TransactionTable";
 import { FinanceChart, type MonthlySummaryPoint } from "@/components/finance/FinanceChart";
-import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { formatCurrency } from "@/lib/format";
+import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
 export default async function FinancePage({
   params,
@@ -47,38 +49,59 @@ export default async function FinancePage({
   const totalExpense = transactions
     .filter((tx) => tx.type === "expense")
     .reduce((sum, tx) => sum + Number(tx.amount), 0);
+  const netProfit = totalIncome - totalExpense;
+
+  const stats = [
+    {
+      label: t("totalIncome"),
+      value: formatCurrency(totalIncome, locale),
+      icon: TrendingUp,
+      className: "text-emerald-600",
+    },
+    {
+      label: t("totalExpense"),
+      value: formatCurrency(totalExpense, locale),
+      icon: TrendingDown,
+      className: "text-destructive",
+    },
+    {
+      label: t("netProfit"),
+      value: formatCurrency(netProfit, locale),
+      icon: Wallet,
+      className: netProfit >= 0 ? "text-foreground" : "text-destructive",
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-        <p className="text-sm text-neutral-500">{t("subtitle")}</p>
-      </div>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card>
-          <p className="text-xs font-medium text-neutral-500">{t("totalIncome")}</p>
-          <p className="mt-1 text-lg font-semibold text-green-700">
-            {formatCurrency(totalIncome, locale)}
-          </p>
-        </Card>
-        <Card>
-          <p className="text-xs font-medium text-neutral-500">{t("totalExpense")}</p>
-          <p className="mt-1 text-lg font-semibold text-red-700">
-            {formatCurrency(totalExpense, locale)}
-          </p>
-        </Card>
-        <Card>
-          <p className="text-xs font-medium text-neutral-500">{t("netProfit")}</p>
-          <p className="mt-1 text-lg font-semibold text-neutral-900">
-            {formatCurrency(totalIncome - totalExpense, locale)}
-          </p>
-        </Card>
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.label}>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
+                  <p className={`text-xl font-semibold sm:text-2xl ${stat.className}`}>{stat.value}</p>
+                </div>
+                <div className="rounded-lg bg-muted p-2">
+                  <Icon className="size-4 text-muted-foreground" />
+                </div>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
-      <Card>
-        <h2 className="mb-4 text-sm font-semibold text-neutral-700">{t("chartTitle")}</h2>
-        <FinanceChart data={chartData} />
+      <Card className="p-0">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{t("chartTitle")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FinanceChart data={chartData} />
+        </CardContent>
       </Card>
 
       <NewTransactionPanel />

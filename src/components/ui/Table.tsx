@@ -1,30 +1,65 @@
-import { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from "react";
-import { cn } from "@/lib/cn";
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
-  return (
-    <div className="overflow-x-auto rounded-lg border border-neutral-200">
-      <table className={cn("w-full text-left text-sm", className)} {...props} />
+const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
+  ({ className, ...props }, ref) => (
+    <div className="relative w-full overflow-auto rounded-lg border">
+      <table ref={ref} className={cn("w-full caption-bottom text-sm", className)} {...props} />
     </div>
-  );
-}
+  )
+);
+Table.displayName = "Table";
 
-export function Thead({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className={cn("bg-neutral-50 text-neutral-600", className)} {...props} />;
-}
+const Thead = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <thead ref={ref} className={cn("[&_tr]:border-b bg-muted/50", className)} {...props} />
+));
+Thead.displayName = "Thead";
 
-export function Tbody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>) {
-  return <tbody className={cn("divide-y divide-neutral-100", className)} {...props} />;
-}
+const Tbody = React.forwardRef<
+  HTMLTableSectionElement,
+  React.HTMLAttributes<HTMLTableSectionElement>
+>(({ className, ...props }, ref) => (
+  <tbody ref={ref} className={cn("[&_tr:last-child]:border-0", className)} {...props} />
+));
+Tbody.displayName = "Tbody";
 
-export function Tr({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn("hover:bg-neutral-50", className)} {...props} />;
-}
+const Tr = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
+  ({ className, ...props }, ref) => (
+    <tr
+      ref={ref}
+      className={cn("border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", className)}
+      {...props}
+    />
+  )
+);
+Tr.displayName = "Tr";
 
-export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>) {
-  return <th className={cn("px-4 py-2.5 font-medium", className)} {...props} />;
-}
+const Th = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<HTMLTableCellElement>>(
+  ({ className, ...props }, ref) => (
+    <th
+      ref={ref}
+      className={cn(
+        "h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        className
+      )}
+      {...props}
+    />
+  )
+);
+Th.displayName = "Th";
 
-export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("px-4 py-2.5 text-neutral-800", className)} {...props} />;
-}
+const Td = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<HTMLTableCellElement>>(
+  ({ className, ...props }, ref) => (
+    <td
+      ref={ref}
+      className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", className)}
+      {...props}
+    />
+  )
+);
+Td.displayName = "Td";
+
+export { Table, Thead, Tbody, Tr, Th, Td };

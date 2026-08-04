@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { requireRole } from "@/lib/auth-guard";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ImportWizard } from "@/components/import/ImportWizard";
 
 export default async function ImportPage() {
@@ -8,10 +9,7 @@ export default async function ImportPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-        <p className="text-sm text-neutral-500">{t("subtitle")}</p>
-      </div>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       <ImportWizard />
     </div>

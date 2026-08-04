@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { requireUser } from "@/lib/auth-guard";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { NewSalePanel } from "@/components/sales/NewSalePanel";
 import { SalesTable } from "@/components/sales/SalesTable";
 
@@ -23,10 +24,7 @@ export default async function SalesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-        <p className="text-sm text-neutral-500">{t("subtitle")}</p>
-      </div>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       {canCreate && <NewSalePanel products={products} />}
 

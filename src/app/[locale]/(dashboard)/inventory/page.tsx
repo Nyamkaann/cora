@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { requireUser } from "@/lib/auth-guard";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { ProductTable } from "@/components/inventory/ProductTable";
 import { NewProductPanel } from "@/components/inventory/NewProductPanel";
 import { QuickAddCategoryBrand } from "@/components/inventory/QuickAddCategoryBrand";
@@ -36,10 +37,7 @@ export default async function InventoryPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-neutral-900">{t("title")}</h1>
-        <p className="text-sm text-neutral-500">{t("subtitle")}</p>
-      </div>
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       {canManage && (
         <div className="space-y-3">
