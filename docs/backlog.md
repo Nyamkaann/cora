@@ -82,6 +82,24 @@
   (`20260923100000_secure_legacy_schema.sql`). Хуучин нууц үгийн hash задарсан
   байж болзошгүй тул тэр нууц үгийг хаана ч дахин ашиглахгүй байхыг зөвлөж байна.
 
+## Phase 8 (Meta нийтлэл) — ЯВЦАД
+Хэрэглэгчийн хүсэлтээр 1 өдрийн MVP-ийн хамрах хүрээнээс гарч эхэлсэн.
+
+Дууссан (багц 1):
+- 4 хүснэгт: `social_accounts`, `scheduled_posts`, `post_results`, `social_api_log` (бүгд RLS-тэй)
+- `fn_claim_due_posts` — `for update skip locked`-оор давхар cron ажиллахаас сэргийлнэ
+- `post_results`-ын `unique(scheduled_post_id, platform)` нь давхар нийтлэхээс хамгаална
+- `lib/crypto.ts` — AES-256-GCM, token хэзээ ч plaintext-ээр хадгалагдахгүй
+- `lib/social/meta.ts` — Graph API v24.0, хувилбар нэг тогтмолд
+- `lib/social/schedule.ts` — Улаанбаатар → UTC хөрвүүлэлт, 10 мин – 6 сарын цонх
+- 35 шинэ unit test (нийт 93)
+
+Үлдсэн:
+- OAuth холболт `/admin/settings/social` + callback — **Meta app байхгүй тул хаагдсан**
+- `/admin/posts` календарь, зохиох dialog
+- cron worker + webhook + алдааны UI
+- Caption-ыг AI-аар санал болгох (спецэд бий) — LLM API түлхүүр шаардана, одоогоор алгассан
+
 ## Дараагийн шатанд (01-PROMPTS-YE-SHAT.md)
 - Public storefront (Phase 6)
 - Meta OAuth + автомат нийтлэл (Phase 8)

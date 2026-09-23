@@ -558,6 +558,53 @@ export type Database = {
         }
         Relationships: []
       }
+      post_results: {
+        Row: {
+          created_at: string
+          error: string | null
+          external_post_id: string | null
+          id: string
+          permalink: string | null
+          platform: string
+          published_at: string | null
+          scheduled_post_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          external_post_id?: string | null
+          id?: string
+          permalink?: string | null
+          platform: string
+          published_at?: string | null
+          scheduled_post_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          external_post_id?: string | null
+          id?: string
+          permalink?: string | null
+          platform?: string
+          published_at?: string | null
+          scheduled_post_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_results_scheduled_post_id_fkey"
+            columns: ["scheduled_post_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poster_templates: {
         Row: {
           background_path: string | null
@@ -783,6 +830,188 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_posts: {
+        Row: {
+          attempts: number
+          caption: string | null
+          created_at: string
+          created_by: string | null
+          hashtags: string[]
+          id: string
+          last_error: string | null
+          platforms: string[]
+          poster_path: string | null
+          product_id: string
+          scheduled_at: string | null
+          status: string
+          template_id: string | null
+          updated_at: string
+          variant_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          hashtags?: string[]
+          id?: string
+          last_error?: string | null
+          platforms?: string[]
+          poster_path?: string | null
+          product_id: string
+          scheduled_at?: string | null
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          caption?: string | null
+          created_at?: string
+          created_by?: string | null
+          hashtags?: string[]
+          id?: string
+          last_error?: string | null
+          platforms?: string[]
+          poster_path?: string | null
+          product_id?: string
+          scheduled_at?: string | null
+          status?: string
+          template_id?: string | null
+          updated_at?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_posts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_products"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "poster_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "v_variant_stock"
+            referencedColumns: ["variant_id"]
+          },
+        ]
+      }
+      social_accounts: {
+        Row: {
+          access_token_encrypted: string
+          connected_by: string | null
+          created_at: string
+          external_id: string
+          id: string
+          is_active: boolean
+          name: string | null
+          parent_page_id: string | null
+          platform: string
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token_encrypted: string
+          connected_by?: string | null
+          created_at?: string
+          external_id: string
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          parent_page_id?: string | null
+          platform: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token_encrypted?: string
+          connected_by?: string | null
+          created_at?: string
+          external_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string | null
+          parent_page_id?: string | null
+          platform?: string
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_api_log: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          endpoint: string
+          error: string | null
+          id: string
+          method: string
+          platform: string
+          request_summary: Json | null
+          response_summary: Json | null
+          scheduled_post_id: string | null
+          status_code: number | null
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint: string
+          error?: string | null
+          id?: string
+          method: string
+          platform: string
+          request_summary?: Json | null
+          response_summary?: Json | null
+          scheduled_post_id?: string | null
+          status_code?: number | null
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string
+          error?: string | null
+          id?: string
+          method?: string
+          platform?: string
+          request_summary?: Json | null
+          response_summary?: Json | null
+          scheduled_post_id?: string | null
+          status_code?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_api_log_scheduled_post_id_fkey"
+            columns: ["scheduled_post_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movements: {
         Row: {
           created_at: string
@@ -885,6 +1114,32 @@ export type Database = {
       }
     }
     Functions: {
+      fn_claim_due_posts: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempts: number
+          caption: string | null
+          created_at: string
+          created_by: string | null
+          hashtags: string[]
+          id: string
+          last_error: string | null
+          platforms: string[]
+          poster_path: string | null
+          product_id: string
+          scheduled_at: string | null
+          status: string
+          template_id: string | null
+          updated_at: string
+          variant_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "scheduled_posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       fn_expenses_by_category: {
         Args: { p_from: string; p_to: string }
         Returns: {
