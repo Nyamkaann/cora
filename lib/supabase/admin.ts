@@ -2,7 +2,8 @@ import 'server-only'
 
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-import { env, serverEnv } from '@/lib/env'
+import { env } from '@/lib/env'
+import { serverEnv } from '@/lib/env-server'
 
 /**
  * Service role client. Bypasses RLS, so it must never reach the browser.

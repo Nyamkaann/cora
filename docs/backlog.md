@@ -51,6 +51,12 @@
 - Постерийг `posters` bucket-д кэшлэдэг ч кэшээс уншдаггүй — хүсэлт бүрд дахин
   рендерлэнэ. Удаашрал мэдрэгдвэл кэшээс уншихыг нэмнэ.
 
+## Deploy-оос гарсан
+- CI (GitHub Actions) тохируулаагүй — typecheck/lint/test/build-ыг гараар ажиллуулна.
+- Алдааны хуудас (`error.tsx`), ажиглалт (Sentry г.м.) байхгүй.
+- Rate limit, CSP header байхгүй. Одоогоор X-Frame-Options, X-Content-Type-Options,
+  Referrer-Policy гурвыг л тавьсан.
+
 ## Дараагийн шатанд (01-PROMPTS-YE-SHAT.md)
 - Public storefront (Phase 6)
 - Meta OAuth + автомат нийтлэл (Phase 8)
