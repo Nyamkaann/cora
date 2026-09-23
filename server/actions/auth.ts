@@ -5,10 +5,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 import { createClient } from '@/lib/supabase/server'
-
-export type ActionResult<T = undefined> =
-  | { ok: true; data: T }
-  | { ok: false; error: { message: string } }
+import type { ActionResult } from '@/lib/action-result'
 
 const loginSchema = z.object({
   email: z.string().min(1, 'И-мэйлээ оруулна уу').email('И-мэйл буруу байна'),
