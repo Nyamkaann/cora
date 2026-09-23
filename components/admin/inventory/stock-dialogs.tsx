@@ -195,6 +195,7 @@ export function AdjustStockDialog({ target }: { target: Target }) {
               <Select
                 value={reason}
                 onValueChange={(value) => setReason(value === 'damage' ? 'damage' : 'adjustment')}
+                items={Object.fromEntries(ADJUST_REASONS.map((item) => [item.value, item.label]))}
               >
                 <SelectTrigger id="adjust-reason" className="w-full">
                   <SelectValue />

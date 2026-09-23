@@ -22,7 +22,7 @@ export default async function OrdersPage({
         title="Захиалга"
         description={`Нийт ${orders.length} захиалга`}
         actions={
-          <Button render={<Link href="/admin/orders/new" />}>
+          <Button nativeButton={false} render={<Link href="/admin/orders/new" />}>
             <Plus className="size-4" />
             Шинэ захиалга
           </Button>

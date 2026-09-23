@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { parseMoney, toDbNumeric } from '@/lib/money'
@@ -39,6 +39,19 @@ export function MoneyInput({
     value === '' ? '' : withGrouping(parseMoney(value).toString()),
   )
 
+  // Track what this field last emitted so typing is never reformatted
+  // mid-keystroke, while a value set from outside (the "copy prices to every
+  // row" button, for instance) still shows up.
+  const lastEmitted = useRef(value)
+  const [lastProp, setLastProp] = useState(value)
+
+  if (value !== lastProp) {
+    setLastProp(value)
+    if (value !== lastEmitted.current) {
+      setDisplay(value === '' ? '' : withGrouping(parseMoney(value).toString()))
+    }
+  }
+
   return (
     <Input
       id={id}
@@ -52,7 +65,9 @@ export function MoneyInput({
       onChange={(event) => {
         const next = withGrouping(event.target.value)
         setDisplay(next)
-        onChange(next === '' ? '' : toDbNumeric(next))
+        const emitted = next === '' ? '' : toDbNumeric(next)
+        lastEmitted.current = emitted
+        onChange(emitted)
       }}
       onBlur={() => {
         setDisplay(display === '' ? '' : withGrouping(toDbNumeric(display)))

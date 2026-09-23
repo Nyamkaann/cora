@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useId, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -56,16 +56,13 @@ type BasicValues = z.infer<typeof basicSchema>
 
 type OptionMode = 'none' | 'Size' | 'Volume' | 'custom'
 
-function newKey(): string {
-  return crypto.randomUUID()
-}
-
 function blankDraft(
   attributes: Record<string, string>,
   productSlug: string,
+  key: string,
 ): VariantDraft {
   return {
-    key: newKey(),
+    key,
     attributes,
     sku: suggestSku(productSlug, Object.values(attributes)),
     costPrice: '',
@@ -107,6 +104,15 @@ export function ProductForm({
   const [isPending, startTransition] = useTransition()
   const initialOption = useMemo(() => initialOptionState(product), [product])
 
+  // Keys must match between the server render and hydration, so they are
+  // derived from useId rather than a random uuid.
+  const keyPrefix = useId()
+  const keyCounter = useRef(0)
+  const nextKey = () => {
+    keyCounter.current += 1
+    return `${keyPrefix}-${keyCounter.current}`
+  }
+
   const [mode, setMode] = useState<OptionMode>(initialOption.mode)
   const [optionName, setOptionName] = useState(initialOption.optionName)
   const [optionValues, setOptionValues] = useState<string[]>(initialOption.values)
@@ -115,7 +121,7 @@ export function ProductForm({
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([])
 
   const [variants, setVariants] = useState<VariantDraft[]>(() => {
-    if (!product) return [blankDraft({}, '')]
+    if (!product) return [blankDraft({}, '', `${keyPrefix}-1`)]
     return product.variants.map((variant) => ({
       key: variant.id,
       id: variant.id,
@@ -128,6 +134,8 @@ export function ProductForm({
       currentStock: variant.current_stock,
     }))
   })
+
+  if (keyCounter.current === 0) keyCounter.current = variants.length
 
   const {
     register,
@@ -147,6 +155,18 @@ export function ProductForm({
     },
   })
 
+  // Base UI renders the raw value in Select.Value unless the root is given a
+  // value -> label map.
+  const brandItems = useMemo(
+    () => ({ [NONE]: 'Сонгоогүй', ...Object.fromEntries(brands.map((b) => [b.id, b.name])) }),
+    [brands],
+  )
+  const categoryItems = useMemo(
+    () => ({ [NONE]: 'Сонгоогүй', ...Object.fromEntries(categories.map((c) => [c.id, c.name])) }),
+    [categories],
+  )
+  const statusItems = { active: 'Идэвхтэй', archived: 'Архивласан' }
+
   const slug = watch('slug')
   const brandId = watch('brand_id')
   const categoryId = watch('category_id')
@@ -156,7 +176,7 @@ export function ProductForm({
     setVariants((previous) => {
       if (nextOptionName === '') {
         const kept = previous[0]
-        if (!kept) return [blankDraft({}, slug)]
+        if (!kept) return [blankDraft({}, slug, nextKey())]
         return [{ ...kept, attributes: {} }]
       }
 
@@ -167,7 +187,7 @@ export function ProductForm({
 
         const attributes = { [nextOptionName]: value }
         if (match) return { ...match, attributes }
-        return blankDraft(attributes, slug)
+        return blankDraft(attributes, slug, nextKey())
       })
     })
   }
@@ -361,6 +381,7 @@ export function ProductForm({
             <Select
               value={brandId}
               onValueChange={(value) => setValue('brand_id', String(value))}
+              items={brandItems}
             >
               <SelectTrigger id="brand" className="w-full">
                 <SelectValue placeholder="Сонгох" />
@@ -381,6 +402,7 @@ export function ProductForm({
             <Select
               value={categoryId}
               onValueChange={(value) => setValue('category_id', String(value))}
+              items={categoryItems}
             >
               <SelectTrigger id="category" className="w-full">
                 <SelectValue placeholder="Сонгох" />
@@ -406,6 +428,7 @@ export function ProductForm({
             <Select
               value={status}
               onValueChange={(value) => setValue('status', value === 'archived' ? 'archived' : 'active')}
+              items={statusItems}
             >
               <SelectTrigger id="status" className="w-full">
                 <SelectValue />

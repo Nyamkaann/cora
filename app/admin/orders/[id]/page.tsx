@@ -47,7 +47,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         title={order.orderNo ?? 'Захиалга'}
         description={`${formatDateTime(order.orderedAt)} · ${ORDER_CHANNEL_LABELS[order.channel]}`}
         actions={
-          <Button variant="outline" render={<Link href="/admin/orders" />}>
+          <Button variant="outline" nativeButton={false} render={<Link href="/admin/orders" />}>
             <ArrowLeft className="size-4" />
             Буцах
           </Button>

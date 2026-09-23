@@ -170,6 +170,7 @@ export function OrderForm({ options }: { options: VariantOption[] }) {
               <Select
                 value={channel}
                 onValueChange={(value) => setChannel(String(value) as OrderChannel)}
+                items={ORDER_CHANNEL_LABELS}
               >
                 <SelectTrigger id="channel" className="w-full">
                   <SelectValue />

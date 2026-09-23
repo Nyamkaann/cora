@@ -48,7 +48,7 @@ export default async function VariantMovementsPage({
         title={`${summary.productName} · ${summary.variantLabel}`}
         description={`Одоогийн нөөц ${summary.currentStock} · өртөг ${formatMNT(summary.costPrice)}`}
         actions={
-          <Button variant="outline" render={<Link href="/admin/inventory" />}>
+          <Button variant="outline" nativeButton={false} render={<Link href="/admin/inventory" />}>
             <ArrowLeft className="size-4" />
             Буцах
           </Button>

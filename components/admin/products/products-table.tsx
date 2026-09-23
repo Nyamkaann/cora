@@ -50,6 +50,16 @@ export function ProductsTable({
   const [outOfStockOnly, setOutOfStockOnly] = useState(false)
   const [posterTarget, setPosterTarget] = useState<PosterTarget | null>(null)
 
+  const brandItems = useMemo(
+    () => ({ [ALL]: 'Бүх брэнд', ...Object.fromEntries(brands.map((b) => [b.id, b.name])) }),
+    [brands],
+  )
+  const categoryItems = useMemo(
+    () => ({ [ALL]: 'Бүх ангилал', ...Object.fromEntries(categories.map((c) => [c.id, c.name])) }),
+    [categories],
+  )
+  const statusItems = { [ALL]: 'Бүх төлөв', active: 'Идэвхтэй', archived: 'Архивласан' }
+
   const rows = useMemo(
     () =>
       products.filter((product) => {
@@ -180,7 +190,7 @@ export function ProductsTable({
                 }
               />
               <DropdownMenuContent align="end">
-                <DropdownMenuItem render={<Link href={`/admin/products/${product.id}`} />}>
+                <DropdownMenuItem nativeButton={false} render={<Link href={`/admin/products/${product.id}`} />}>
                   <Pencil className="size-4" />
                   Засах
                 </DropdownMenuItem>
@@ -230,7 +240,11 @@ export function ProductsTable({
       emptyMessage="Бараа олдсонгүй."
       toolbar={
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={brandId} onValueChange={(value) => setBrandId(String(value))}>
+          <Select
+            value={brandId}
+            onValueChange={(value) => setBrandId(String(value))}
+            items={brandItems}
+          >
             <SelectTrigger className="w-36">
               <SelectValue placeholder="Брэнд" />
             </SelectTrigger>
@@ -244,7 +258,11 @@ export function ProductsTable({
             </SelectContent>
           </Select>
 
-          <Select value={categoryId} onValueChange={(value) => setCategoryId(String(value))}>
+          <Select
+            value={categoryId}
+            onValueChange={(value) => setCategoryId(String(value))}
+            items={categoryItems}
+          >
             <SelectTrigger className="w-36">
               <SelectValue placeholder="Ангилал" />
             </SelectTrigger>
@@ -258,7 +276,11 @@ export function ProductsTable({
             </SelectContent>
           </Select>
 
-          <Select value={status} onValueChange={(value) => setStatus(String(value))}>
+          <Select
+            value={status}
+            onValueChange={(value) => setStatus(String(value))}
+            items={statusItems}
+          >
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Төлөв" />
             </SelectTrigger>

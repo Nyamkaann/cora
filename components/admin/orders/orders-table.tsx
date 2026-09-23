@@ -42,6 +42,9 @@ export function OrdersTable({ orders }: { orders: OrderListRow[] }) {
   const [channel, setChannel] = useQueryState('channel', { defaultValue: 'all', shallow: false })
   const [status, setStatus] = useQueryState('status', { defaultValue: 'all', shallow: false })
 
+  const channelItems = { all: 'Бүх суваг', ...ORDER_CHANNEL_LABELS }
+  const statusItems = { all: 'Бүх төлөв', ...ORDER_STATUS_LABELS }
+
   const columns = useMemo<LegacyColumnDef<OrderListRow, unknown>[]>(
     () => [
       {
@@ -134,7 +137,11 @@ export function OrdersTable({ orders }: { orders: OrderListRow[] }) {
             />
           </div>
 
-          <Select value={channel} onValueChange={(value) => setChannel(String(value))}>
+          <Select
+            value={channel}
+            onValueChange={(value) => setChannel(String(value))}
+            items={channelItems}
+          >
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Суваг" />
             </SelectTrigger>
@@ -148,7 +155,11 @@ export function OrdersTable({ orders }: { orders: OrderListRow[] }) {
             </SelectContent>
           </Select>
 
-          <Select value={status} onValueChange={(value) => setStatus(String(value))}>
+          <Select
+            value={status}
+            onValueChange={(value) => setStatus(String(value))}
+            items={statusItems}
+          >
             <SelectTrigger className="w-36">
               <SelectValue placeholder="Төлөв" />
             </SelectTrigger>

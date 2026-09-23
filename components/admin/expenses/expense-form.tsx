@@ -35,6 +35,11 @@ export function ExpenseForm() {
   const [expenseDate, setExpenseDate] = useState(today())
   const [description, setDescription] = useState('')
 
+  const categoryItems = {
+    ...Object.fromEntries(PRESET_CATEGORIES.map((item) => [item, item])),
+    [CUSTOM]: 'Өөрөө бичих…',
+  }
+
   function submit() {
     const finalCategory = category === CUSTOM ? customCategory.trim() : category
     if (!finalCategory) {
@@ -70,7 +75,11 @@ export function ExpenseForm() {
       <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-2">
           <Label htmlFor="category">Ангилал</Label>
-          <Select value={category} onValueChange={(value) => setCategory(String(value))}>
+          <Select
+            value={category}
+            onValueChange={(value) => setCategory(String(value))}
+            items={categoryItems}
+          >
             <SelectTrigger id="category" className="w-full">
               <SelectValue />
             </SelectTrigger>

@@ -21,7 +21,7 @@ export default async function ProductsPage() {
         title="Бараа"
         description={`Нийт ${products.length} бараа`}
         actions={
-          <Button render={<Link href="/admin/products/new" />}>
+          <Button nativeButton={false} render={<Link href="/admin/products/new" />}>
             <Plus className="size-4" />
             Шинэ бараа
           </Button>

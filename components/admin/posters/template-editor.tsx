@@ -307,6 +307,7 @@ export function TemplateEditor({
                   </Label>
                   <Select
                     value={textBox.align}
+                    items={{ left: 'Зүүн', center: 'Төв', right: 'Баруун' }}
                     onValueChange={(value) => {
                       const align = value === 'left' || value === 'right' ? value : 'center'
                       if (selected === 'title') patchLayout({ title: { ...layout.title, align } })
@@ -381,6 +382,7 @@ export function TemplateEditor({
               <Select
                 value={previewProductId}
                 onValueChange={(value) => setPreviewProductId(String(value))}
+                items={Object.fromEntries(products.map((p) => [p.id, p.name]))}
               >
                 <SelectTrigger id="preview-product" className="w-full">
                   <SelectValue placeholder="Бараа сонгох" />
