@@ -1,5 +1,6 @@
 import {
   Boxes,
+  Settings,
   Image as ImageIcon,
   LayoutDashboard,
   Package,
@@ -23,4 +24,5 @@ export const navItems: NavItem[] = [
   { href: '/admin/expenses', label: 'Зардал', icon: Receipt },
   { href: '/admin/analytics', label: 'Ашиг орлого', icon: TrendingUp },
   { href: '/admin/posters', label: 'Постер', icon: ImageIcon },
+  { href: '/admin/settings/social', label: 'Сошиал холболт', icon: Settings },
 ]
