@@ -128,3 +128,31 @@
     @apply font-sans;
   }
 }
+
+/* Data visualisation palette. Validated with the dataviz skill's checker:
+   adjacent CVD deltaE 9.1, normal-vision 19.6 on the light surface.
+   Three slots sit below 3:1 contrast, so every chart ships visible labels or a
+   table beside it. */
+:root {
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-4: #eda100;
+  --viz-5: #e87ba4;
+  --viz-6: #008300;
+  --viz-7: #4a3aa7;
+  --viz-8: #e34948;
+  --viz-grid: oklch(0.92 0 0);
+}
+
+.dark {
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-7: #9085e9;
+  --viz-8: #e66767;
+  --viz-grid: oklch(0.3 0 0);
+}
