@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { PageHeader } from '@/components/admin/page-header'
+import { PosterButton } from '@/components/admin/posters/poster-dialog'
 import { ProductForm } from '@/components/admin/products/product-form'
 import {
   getBrandOptions,
@@ -29,6 +30,7 @@ export default async function EditProductPage({
       <PageHeader
         title={product.name}
         description={`Slug: ${product.slug} · ${product.variants.length} хувилбар`}
+        actions={<PosterButton target={{ productId: product.id, productName: product.name }} />}
       />
       <ProductForm brands={brands} categories={categories} product={product} />
     </>

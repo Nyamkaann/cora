@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Copy, MoreHorizontal, PackageX, Pencil } from 'lucide-react'
+import { Copy, Image as ImageIcon, MoreHorizontal, PackageX, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import type { LegacyColumnDef } from '@tanstack/react-table/legacy'
 
@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { DataTable } from '@/components/admin/data-table'
+import { PosterDialog, type PosterTarget } from '@/components/admin/posters/poster-dialog'
 import { MarginBadge } from '@/components/admin/products/margin-badge'
 import { formatMNT } from '@/lib/money'
 import { archiveProduct, duplicateProduct } from '@/server/actions/products'
@@ -47,6 +48,7 @@ export function ProductsTable({
   const [categoryId, setCategoryId] = useState(ALL)
   const [status, setStatus] = useState(ALL)
   const [outOfStockOnly, setOutOfStockOnly] = useState(false)
+  const [posterTarget, setPosterTarget] = useState<PosterTarget | null>(null)
 
   const rows = useMemo(
     () =>
@@ -190,6 +192,14 @@ export function ProductsTable({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() =>
+                    setPosterTarget({ productId: product.id, productName: product.name })
+                  }
+                >
+                  <ImageIcon className="size-4" />
+                  Постер үүсгэх
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
                     runAction(
                       product.status === 'active' ? 'Архивлалаа' : 'Идэвхжүүллээ',
                       () => archiveProduct(product.id, product.status === 'active'),
@@ -211,7 +221,9 @@ export function ProductsTable({
   )
 
   return (
-    <DataTable
+    <>
+      <PosterDialog target={posterTarget} onClose={() => setPosterTarget(null)} />
+      <DataTable
       columns={columns}
       data={rows}
       searchPlaceholder="Нэрээр хайх…"
@@ -266,6 +278,7 @@ export function ProductsTable({
           </Label>
         </div>
       }
-    />
+      />
+    </>
   )
 }

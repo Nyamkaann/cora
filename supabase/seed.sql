@@ -156,7 +156,7 @@ select
      "canvas": { "width": 1080, "height": 1350 },
      "product": { "x": 140, "y": 260, "w": 800, "h": 800 },
      "title": { "x": 80, "y": 1090, "w": 920, "size": 56, "weight": 700, "color": "#111", "align": "center", "maxLines": 2 },
-     "price": { "x": 80, "y": 1180, "w": 920, "size": 72, "weight": 800, "color": "#111", "align": "center" },
+     "price": { "x": 80, "y": 1240, "w": 920, "size": 72, "weight": 800, "color": "#111", "align": "center" },
      "logo": { "x": 80, "y": 80, "w": 180 }
    }'::jsonb,
   true,
