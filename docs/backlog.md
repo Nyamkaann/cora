@@ -1,12 +1,11 @@
 # Backlog — MVP-ээс хойшлуулсан зүйлс
 
 ## S1 (суурь)-ээс гарсан
-- `types/database.ts` одоогоор placeholder. Supabase project link хийсний дараа
-  `pnpm db:types` ажиллуулж, `lib/supabase/*`-д `<Database>` generic-ийг нэмэх.
+- `types/database.ts` үүссэн (`pnpm db:types`). `lib/supabase/*`-д `<Database>` generic-ийг
+  нэмэх ажил үлдсэн — нэмбэл бүх query схемтэй тулгагдаж шалгагдана.
 - shadcn-ийн `form` component энэ registry хувилбарт байхгүй тул формуудыг
   react-hook-form дээр шууд бичсэн. Хэрэгцээ гарвал дараа нэмэх.
-- Migration-ийг локал дээр ажиллуулж шалгаагүй (Docker/Postgres байхгүй).
-  Эхний `supabase db push` дээр алдаа гарвал засах.
+- Migration бүгд Supabase дээр амжилттай орсон (2026-09-23).
 - RLS бодлого MVP-д энгийн: authenticated бүгдийг хийнэ. Олон хэрэглэгч,
   эрхийн түвшин (role) гарвал нарийвчлах.
 - Дэлгэцийн харанхуй горим, animation, micro-interaction.
@@ -56,6 +55,17 @@
 - Алдааны хуудас (`error.tsx`), ажиглалт (Sentry г.м.) байхгүй.
 - Rate limit, CSP header байхгүй. Одоогоор X-Frame-Options, X-Content-Type-Options,
   Referrer-Policy гурвыг л тавьсан.
+
+## Хуучин аппын үлдэгдэл
+- Энэ Supabase төсөл өмнө нь өөр Cora апп (Drizzle + NextAuth) ашиглаж байсан.
+  Түүний 8 хүснэгтийг устгалгүй `legacy_*` нэрээр хажуу тийш зөөсөн (бүгд хоосон,
+  `legacy_users`-д ганц seed мөр). MVP бүрэн ажиллаж баталгаажсаны дараа
+  `drop table public.legacy_* cascade` migration-оор устгаж болно.
+- Хуучин 6 enum (`finance_type`, `user_role` г.м.) мөн үлдсэн — юутай ч мөргөлдөхгүй.
+- ⚠️ Тэр хүснэгтүүд RLS-гүй байсан тул `legacy_users`-ийн и-мэйл, password_hash
+  anon key-ээр ил уншигдаж байсныг илрүүлж, RLS асааж хаасан
+  (`20260923100000_secure_legacy_schema.sql`). Хуучин нууц үгийн hash задарсан
+  байж болзошгүй тул тэр нууц үгийг хаана ч дахин ашиглахгүй байхыг зөвлөж байна.
 
 ## Дараагийн шатанд (01-PROMPTS-YE-SHAT.md)
 - Public storefront (Phase 6)
