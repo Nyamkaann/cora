@@ -16,9 +16,10 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['sharp', '@resvg/resvg-js', 'satori'],
   // satori loads harfbuzz's wasm at runtime rather than requiring it, so file
   // tracing never sees it and the deployed function 500s on the first render.
+  // Posters render from the api routes and from the publish server action, so
+  // every function gets the file rather than a list that drifts out of date.
   outputFileTracingIncludes: {
-    '/api/poster': ['./node_modules/.pnpm/harfbuzzjs@*/**/*.wasm'],
-    '/api/poster/bulk': ['./node_modules/.pnpm/harfbuzzjs@*/**/*.wasm'],
+    '/**': ['./node_modules/.pnpm/harfbuzzjs@*/**/*.wasm'],
   },
   images: {
     remotePatterns: supabaseHost
