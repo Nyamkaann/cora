@@ -14,7 +14,11 @@ import {
   storeOAuthState,
 } from '@/server/social/oauth-session'
 
-/** Everything Phase 8 needs; Meta grants them all in one dialog. */
+/**
+ * Everything Phase 8 needs. Facebook Login for Business ignores `scope` and
+ * reads the permissions off the login configuration instead, so these are only
+ * sent when no configuration id is set.
+ */
 const SCOPES = [
   'pages_show_list',
   'pages_read_engagement',
@@ -55,8 +59,15 @@ export async function startMetaOAuth(): Promise<ActionResult<{ url: string }>> {
   url.searchParams.set('client_id', credentials.appId)
   url.searchParams.set('redirect_uri', callbackUrl())
   url.searchParams.set('state', state)
-  url.searchParams.set('scope', SCOPES.join(','))
   url.searchParams.set('response_type', 'code')
+
+  // The configuration id is not a secret: it travels in the consent url.
+  const configId = process.env.META_LOGIN_CONFIG_ID
+  if (configId) {
+    url.searchParams.set('config_id', configId)
+  } else {
+    url.searchParams.set('scope', SCOPES.join(','))
+  }
 
   return { ok: true, data: { url: url.toString() } }
 }
