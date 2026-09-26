@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
   // sharp, resvg and satori are native or wasm backed: they must stay outside
   // the bundle and off the edge runtime.
   serverExternalPackages: ['sharp', '@resvg/resvg-js', 'satori'],
+  // satori loads harfbuzz's wasm at runtime rather than requiring it, so file
+  // tracing never sees it and the deployed function 500s on the first render.
+  outputFileTracingIncludes: {
+    '/api/poster': ['./node_modules/.pnpm/harfbuzzjs@*/**/*.wasm'],
+    '/api/poster/bulk': ['./node_modules/.pnpm/harfbuzzjs@*/**/*.wasm'],
+  },
   images: {
     remotePatterns: supabaseHost
       ? [{ protocol: 'https', hostname: supabaseHost, pathname: '/storage/v1/object/public/**' }]
