@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/admin/page-header'
+import { ExcelActions } from '@/components/admin/products/excel-actions'
 import { ProductsTable } from '@/components/admin/products/products-table'
 import { getBrandOptions, getCategoryOptions, getProductList } from '@/server/queries/products'
 
@@ -21,10 +22,13 @@ export default async function ProductsPage() {
         title="Бараа"
         description={`Нийт ${products.length} бараа`}
         actions={
-          <Button nativeButton={false} render={<Link href="/admin/products/new" />}>
-            <Plus className="size-4" />
-            Шинэ бараа
-          </Button>
+          <>
+            <ExcelActions />
+            <Button nativeButton={false} render={<Link href="/admin/products/new" />}>
+              <Plus className="size-4" />
+              Шинэ бараа
+            </Button>
+          </>
         }
       />
       <ProductsTable products={products} brands={brands} categories={categories} />
