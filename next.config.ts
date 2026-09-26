@@ -18,8 +18,10 @@ const nextConfig: NextConfig = {
   // tracing never sees it and the deployed function 500s on the first render.
   // Posters render from the api routes and from the publish server action, so
   // every function gets the file rather than a list that drifts out of date.
+  // The renderer also reads the two Cyrillic fonts off disk; public/ is served
+  // as static assets and is not part of a function's filesystem otherwise.
   outputFileTracingIncludes: {
-    '/**': ['./node_modules/.pnpm/harfbuzzjs@*/**/*.wasm'],
+    '/**': ['./node_modules/.pnpm/harfbuzzjs@*/**/*.wasm', './public/fonts/*.ttf'],
   },
   images: {
     remotePatterns: supabaseHost
