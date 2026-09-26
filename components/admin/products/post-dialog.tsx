@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { CheckCircle2, ExternalLink, Send, XCircle } from 'lucide-react'
+import { CalendarClock, CheckCircle2, ExternalLink, Send, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -25,7 +25,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { publishProductPost, type PublishSummary } from '@/server/actions/posts'
+import { utcToUlaanbaatarFields } from '@/lib/social/schedule'
+import { publishProductPost, type PublishResult } from '@/server/actions/posts'
 
 export type PostVariantOption = { id: string; label: string }
 export type PostTemplateOption = { id: string; name: string }
@@ -66,7 +67,7 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewing, setPreviewing] = useState(false)
-  const [summary, setSummary] = useState<PublishSummary | null>(null)
+  const [summary, setSummary] = useState<PublishResult | null>(null)
 
   const open = target !== null
   const hasConnection = Boolean(target?.facebookName || target?.instagramName)
@@ -94,11 +95,6 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
 
     wasOpen.current = isOpen
   }, [target])
-
-  // Instagram cannot be scheduled through the Graph API.
-  useEffect(() => {
-    if (scheduled) setToInstagram(false)
-  }, [scheduled])
 
   // Re-render the poster whenever what it shows changes. Keyed on the product
   // id rather than the target object, so a revalidation does not refetch it.
@@ -171,9 +167,9 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
 
       setSummary(result.data)
 
-      if (result.data.status === 'failed') toast.error('Нийтлэх амжилтгүй боллоо')
-      else if (result.data.status === 'partial') toast.warning('Зарим суваг амжилтгүй боллоо')
-      else if (result.data.status === 'queued') toast.success('Товлолоо')
+      if (result.data.kind === 'queued') toast.success('Товлолоо')
+      else if (result.data.summary.status === 'failed') toast.error('Нийтлэх амжилтгүй боллоо')
+      else if (result.data.summary.status === 'partial') toast.warning('Зарим суваг амжилтгүй боллоо')
       else toast.success('Нийтэллээ')
     })
   }
@@ -188,8 +184,23 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
         </DialogHeader>
 
         {summary ? (
+          summary.kind === 'queued' ? (
+            <div className="flex items-start gap-2 rounded-lg border p-3 text-sm">
+              <CalendarClock className="mt-0.5 size-4 shrink-0 text-primary" />
+              <div className="space-y-1">
+                <p className="font-medium">Товлогдлоо</p>
+                <p className="text-muted-foreground">
+                  {(() => {
+                    const when = utcToUlaanbaatarFields(summary.queued.scheduledAt)
+                    return `${when.date} ${when.time}`
+                  })()}{' '}
+                  — Cora цагт нь өөрөө илгээнэ.
+                </p>
+              </div>
+            </div>
+          ) : (
           <div className="space-y-2">
-            {summary.results.map((result) => (
+            {summary.summary.results.map((result) => (
               <div
                 key={result.platform}
                 className="flex items-start gap-2 rounded-lg border p-3 text-sm"
@@ -202,7 +213,7 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
                 <div className="space-y-1">
                   <p className="font-medium">
                     {PLATFORM_LABELS[result.platform]}
-                    {result.ok ? (result.scheduled ? ' — товлогдлоо' : ' — нийтлэгдлээ') : ' — алдаа'}
+                    {result.ok ? ' — нийтлэгдлээ' : ' — алдаа'}
                   </p>
                   {result.error ? (
                     <p className="text-muted-foreground">{result.error}</p>
@@ -221,6 +232,7 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
               </div>
             ))}
           </div>
+          )
         ) : (
           <div className="grid gap-4 sm:grid-cols-[200px_1fr]">
             <div className="space-y-2">
@@ -342,7 +354,7 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
                     <Label className="flex items-center gap-2 font-normal">
                       <Checkbox
                         checked={toInstagram}
-                        disabled={!target?.instagramName || scheduled}
+                        disabled={!target?.instagramName}
                         onCheckedChange={(checked) => setToInstagram(checked === true)}
                       />
                       Instagram
@@ -399,8 +411,8 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Улаанбаатарын цагаар. Хамгийн багадаа 10 минутын дараа. Instagram-ыг товлох
-                      боломжгүй тул зөвхөн Facebook-д илгээнэ.
+                      Улаанбаатарын цагаар. Хамгийн багадаа 10 минутын дараа. Товлосон постыг
+                      Cora өөрөө цагт нь илгээнэ.
                     </p>
                   </div>
                 ) : null}

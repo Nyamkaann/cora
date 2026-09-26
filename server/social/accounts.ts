@@ -20,9 +20,18 @@ const EXPIRY_WARNING_MS = 7 * 24 * 60 * 60 * 1000
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>
 
+/**
+ * The cron worker runs without a session, so it passes the service role
+ * client in instead of relying on the request's cookies.
+ */
+export type SocialDb = SupabaseServerClient
+
 /** Writes a Graph call to the log. Tokens are already masked by the client. */
-export async function logGraphCall(entry: GraphLogEntry & { scheduledPostId?: string }) {
-  const supabase = await createClient()
+export async function logGraphCall(
+  entry: GraphLogEntry & { scheduledPostId?: string },
+  db?: SocialDb,
+) {
+  const supabase = db ?? (await createClient())
 
   await supabase.from('social_api_log').insert({
     platform: entry.platform,
@@ -129,8 +138,9 @@ async function readToken(
 export async function getMetaClientFor(
   platform: SocialPlatform,
   scheduledPostId?: string,
+  db?: SocialDb,
 ): Promise<{ client: ReturnType<typeof createMetaClient>; externalId: string } | null> {
-  const supabase = await createClient()
+  const supabase = db ?? (await createClient())
 
   const account = await readToken(supabase, platform)
   if (!account) return null
@@ -144,7 +154,7 @@ export async function getMetaClientFor(
   return {
     client: createMetaClient({
       accessToken: token,
-      log: (entry) => logGraphCall({ ...entry, scheduledPostId }),
+      log: (entry) => logGraphCall({ ...entry, scheduledPostId }, db),
     }),
     externalId: account.externalId,
   }
