@@ -193,6 +193,11 @@ export async function publishProductPost(input: unknown): Promise<ActionResult<P
           post.id,
         )
         externalId = response.id
+
+        // The post is already live; a missing link is not worth failing over.
+        permalink = await connection.client
+          .getInstagramPermalink(externalId, post.id)
+          .catch(() => null)
       }
 
       await supabase.from('post_results').upsert(

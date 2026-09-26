@@ -286,6 +286,19 @@ export function createMetaClient(options: MetaClientOptions) {
         scheduledPostId,
       )
     },
+
+    /** media_publish only returns an id, so the link needs a second call. */
+    async getInstagramPermalink(mediaId: string, scheduledPostId?: string) {
+      const media = await request<{ permalink?: string }>(
+        'instagram',
+        'GET',
+        mediaId,
+        { fields: 'permalink' },
+        scheduledPostId,
+      )
+
+      return media.permalink ?? null
+    },
   }
 }
 

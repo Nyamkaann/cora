@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { CheckCircle2, ExternalLink, Send, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -71,19 +71,28 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
   const open = target !== null
   const hasConnection = Boolean(target?.facebookName || target?.instagramName)
 
-  // Fresh form every time the dialog opens.
+  // Fresh form every time the dialog opens — on the open itself, not on every
+  // new target object. Publishing revalidates the page, which hands down a new
+  // target and would otherwise wipe the result the admin is reading.
+  const wasOpen = useRef(false)
+
   useEffect(() => {
-    if (!target) return
-    setVariantId(ALL_VARIANTS)
-    setTemplateId(target.templates[0]?.id ?? '')
-    setCaption('')
-    setHashtags('')
-    setToFacebook(Boolean(target.facebookName))
-    setToInstagram(Boolean(target.instagramName))
-    setScheduled(false)
-    setDate('')
-    setTime('')
-    setSummary(null)
+    const isOpen = target !== null
+
+    if (isOpen && !wasOpen.current) {
+      setVariantId(ALL_VARIANTS)
+      setTemplateId(target.templates[0]?.id ?? '')
+      setCaption('')
+      setHashtags('')
+      setToFacebook(Boolean(target.facebookName))
+      setToInstagram(Boolean(target.instagramName))
+      setScheduled(false)
+      setDate('')
+      setTime('')
+      setSummary(null)
+    }
+
+    wasOpen.current = isOpen
   }, [target])
 
   // Instagram cannot be scheduled through the Graph API.
@@ -91,9 +100,12 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
     if (scheduled) setToInstagram(false)
   }, [scheduled])
 
-  // Re-render the poster whenever what it shows changes.
+  // Re-render the poster whenever what it shows changes. Keyed on the product
+  // id rather than the target object, so a revalidation does not refetch it.
+  const productId = target?.productId ?? null
+
   useEffect(() => {
-    if (!target || !templateId) return
+    if (!productId || !templateId) return
 
     let active = true
     let createdUrl: string | null = null
@@ -106,7 +118,7 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            productId: target.productId,
+            productId,
             variantId: variantId === ALL_VARIANTS ? null : variantId,
             templateId,
           }),
@@ -127,7 +139,7 @@ export function PostDialog({ target, onClose }: { target: PostTarget | null; onC
       active = false
       if (createdUrl) URL.revokeObjectURL(createdUrl)
     }
-  }, [target, variantId, templateId])
+  }, [productId, variantId, templateId])
 
   const platforms = [
     ...(toFacebook ? (['facebook'] as const) : []),
