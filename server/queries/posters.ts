@@ -9,6 +9,12 @@ import { createClient } from '@/lib/supabase/server'
 const PRODUCT_IMAGES_BUCKET = 'product-images'
 const POSTERS_BUCKET = 'posters'
 
+/**
+ * The cron worker publishes without a session, so it hands its own client in.
+ * Left out, these queries use the request's cookies as everything else does.
+ */
+export type PosterDb = Awaited<ReturnType<typeof createClient>>
+
 export type PosterTemplate = {
   id: string
   name: string
@@ -75,8 +81,8 @@ function toTemplate(row: RawTemplate): PosterTemplate {
   }
 }
 
-export async function getPosterTemplates(): Promise<PosterTemplate[]> {
-  const supabase = await createClient()
+export async function getPosterTemplates(db?: PosterDb): Promise<PosterTemplate[]> {
+  const supabase = db ?? (await createClient())
 
   const { data, error } = await supabase
     .from('poster_templates')
@@ -118,8 +124,9 @@ export async function getPosterRenderInput(
   productId: string,
   variantId?: string | null,
   templateId?: string | null,
+  db?: PosterDb,
 ): Promise<PosterRenderInput | null> {
-  const supabase = await createClient()
+  const supabase = db ?? (await createClient())
 
   const { data, error } = await supabase
     .from('products')
@@ -180,7 +187,7 @@ export async function getPosterRenderInput(
     images.find((image) => image.is_primary) ??
     images[0]
 
-  const templates = await getPosterTemplates()
+  const templates = await getPosterTemplates(supabase)
   const template =
     (templateId ? templates.find((candidate) => candidate.id === templateId) : undefined) ??
     templates.find((candidate) => candidate.isDefault && candidate.isActive) ??

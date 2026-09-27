@@ -59,7 +59,7 @@ export async function renderAndStorePoster(
   variantId: string | null,
   templateId: string | null,
 ): Promise<{ url: string; path: string; templateId: string } | null> {
-  const input = await getPosterRenderInput(productId, variantId, templateId)
+  const input = await getPosterRenderInput(productId, variantId, templateId, db)
   if (!input) return null
 
   const png = await renderPoster({
