@@ -117,25 +117,25 @@ describe('toDbNumeric', () => {
 
 describe('formatMNT', () => {
   it('formats whole amounts without decimals', () => {
-    expect(formatMNT('125000')).toBe('₮ 125,000')
-    expect(formatMNT(0)).toBe('₮ 0')
+    expect(formatMNT('125000')).toBe('125,000₮')
+    expect(formatMNT(0)).toBe('0₮')
   })
 
   it('shows cents only when they exist', () => {
-    expect(formatMNT('125000.5')).toBe('₮ 125,000.50')
-    expect(formatMNT('125000', { forceDecimals: true })).toBe('₮ 125,000.00')
+    expect(formatMNT('125000.5')).toBe('125,000.50₮')
+    expect(formatMNT('125000', { forceDecimals: true })).toBe('125,000.00₮')
   })
 
   it('prefixes negative amounts', () => {
-    expect(formatMNT('-125000')).toBe('-₮ 125,000')
+    expect(formatMNT('-125000')).toBe('-125,000₮')
   })
 
   it('formats billions with grouping', () => {
-    expect(formatMNT('1234567890.12')).toBe('₮ 1,234,567,890.12')
+    expect(formatMNT('1234567890.12')).toBe('1,234,567,890.12₮')
   })
 
   it('accepts a Decimal instance', () => {
-    expect(formatMNT(new Decimal('45000'))).toBe('₮ 45,000')
+    expect(formatMNT(new Decimal('45000'))).toBe('45,000₮')
   })
 })
 

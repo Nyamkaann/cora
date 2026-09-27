@@ -95,7 +95,8 @@ export function formatMNT(value: MoneyInput, options?: { forceDecimals?: boolean
   const showCents = options?.forceDecimals === true || cents !== '00'
   const body = showCents ? `${groupThousands(whole)}.${cents}` : groupThousands(whole)
 
-  return `${isNegative ? '-' : ''}${CURRENCY_SYMBOL} ${body}`
+  // Mongolian writes the tugrik after the amount: 98,000₮.
+  return `${isNegative ? '-' : ''}${body}${CURRENCY_SYMBOL}`
 }
 
 /** "42.5%" for margin and share labels. */
