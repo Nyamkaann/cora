@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Product image collection working files (brand assets, not ours to commit)
+tmp-images/
